@@ -133,20 +133,16 @@ struct ImNodeData
 {
     int    Id;
     ImVec2 OriginInGridSpace;
+    ImRect TitleBarContentRectInGridSpace;
 
 private:
-    ImRect _TitleBarContentRect;
     ImRect _Rect;
 
 public:
-    const ImRect& TitleBarContentRectInGridSpace() const{
-        return _TitleBarContentRect;
-    }
     const ImRect RectInEditorSpace() const {
         return {_Rect.Min, _Rect.Min  + (_Rect.Max - _Rect.Min) * ImNodes::EditorContextGetZoom()};
     }
 
-    void SetTitleBarContentRect(ImRect r) {_TitleBarContentRect = r;}
     void SetRect(ImRect r) {_Rect = r;}
 
     struct
@@ -166,7 +162,7 @@ public:
     bool          Draggable;
 
     ImNodeData(const int node_id)
-        : Id(node_id), OriginInGridSpace(100.0f, 100.0f), _TitleBarContentRect(),
+        : Id(node_id), OriginInGridSpace(100.0f, 100.0f), TitleBarContentRectInGridSpace(),
           _Rect(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
           Draggable(true)
     {

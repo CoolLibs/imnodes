@@ -1271,13 +1271,13 @@ inline ImVec2 GetNodeTitleBarOriginInGridSpace(const ImNodeData& node)
 inline ImVec2 GetNodeContentOriginInGridSpace(const ImNodeData& node)
 {
     const ImVec2 title_bar_height =
-        ImVec2(0.f, node.TitleBarContentRectInGridSpace().GetHeight() + 2.0f * node.LayoutStyle.Padding.y);
+        ImVec2(0.f, node.TitleBarContentRectInGridSpace.GetHeight() + 2.0f * node.LayoutStyle.Padding.y);
     return node.OriginInGridSpace + title_bar_height + node.LayoutStyle.Padding;
 }
 
 inline ImRect GetNodeTitleRectInEditorSpace(const ImNodeData& node)
 {
-    ImRect expanded_title_rect = node.TitleBarContentRectInGridSpace();
+    ImRect expanded_title_rect = node.TitleBarContentRectInGridSpace;
     expanded_title_rect.Expand(node.LayoutStyle.Padding);
 
     return ImRect(
@@ -1481,7 +1481,7 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
             node.RectInEditorSpace().Min, node.RectInEditorSpace().Max, node_background, node.LayoutStyle.CornerRounding);
 
         // title bar:
-        if (node.TitleBarContentRectInGridSpace().GetHeight() > 0.f)
+        if (node.TitleBarContentRectInGridSpace.GetHeight() > 0.f)
         {
             ImRect title_bar_rect = GetNodeTitleRectInEditorSpace(node);
             title_bar_rect.Max = ImMin(title_bar_rect.Max, node.RectInEditorSpace().Max);
@@ -2492,7 +2492,7 @@ void EndNodeTitleBar()
 
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = editor.Nodes.Pool[GImNodes->CurrentNodeIdx];
-    node.SetTitleBarContentRect(GetItemRect());
+    node.TitleBarContentRectInGridSpace = GetItemRect();
 
     ImGui::ItemAdd(GetNodeTitleRectInEditorSpace(node), ImGui::GetID("title_bar"));
 
