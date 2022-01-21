@@ -148,11 +148,8 @@ public:
     const ImRect& TitleBarContentRectInGridSpace() const{
         return _TitleBarContentRect;
     }
-    const ImRect& Rect() const {
-        static ImRect global;
-        global.Min = _Rect.Min;
-        global.Max = _Rect.Min  + (_Rect.Max - _Rect.Min) * ImNodes::EditorContextGetZoom();
-        return global;
+    const ImRect RectInEditorSpace() const {
+        return {_Rect.Min, _Rect.Min  + (_Rect.Max - _Rect.Min) * ImNodes::EditorContextGetZoom()};
     }
 
     void SetTitleBarContentRect(ImRect r) {_TitleBarContentRect = r;}
