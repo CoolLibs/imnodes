@@ -139,12 +139,6 @@ private:
     ImRect _Rect;
 
 public:
-    const ImRect& TitleBarContentRectInEditorSpace() const{
-        static ImRect global;
-        global.Min = _TitleBarContentRect.Min;
-        global.Max = _TitleBarContentRect.Min  + (_TitleBarContentRect.Max - _TitleBarContentRect.Min) * ImNodes::EditorContextGetZoom();
-        return global;
-    }
     const ImRect& TitleBarContentRectInGridSpace() const{
         return _TitleBarContentRect;
     }

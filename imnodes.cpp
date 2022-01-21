@@ -1481,7 +1481,7 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
             node.RectInEditorSpace().Min, node.RectInEditorSpace().Max, node_background, node.LayoutStyle.CornerRounding);
 
         // title bar:
-        if (node.TitleBarContentRectInEditorSpace().GetHeight() > 0.f)
+        if (node.TitleBarContentRectInGridSpace().GetHeight() > 0.f)
         {
             ImRect title_bar_rect = GetNodeTitleRectInEditorSpace(node);
 
