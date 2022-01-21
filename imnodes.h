@@ -236,6 +236,8 @@ void                  EditorContextSet(ImNodesEditorContext*);
 ImVec2                EditorContextGetPanning();
 void                  EditorContextResetPanning(const ImVec2& pos);
 void                  EditorContextMoveToNode(const int node_id);
+float                 EditorContextGetZoom();
+void                  EditorContextSetZoom(float zoom, const ImVec2& zoom_centering_pos_in_screen_space = ImVec2());
 
 ImNodesIO& GetIO();
 

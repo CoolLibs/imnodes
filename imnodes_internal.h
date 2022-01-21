@@ -132,9 +132,34 @@ private:
 struct ImNodeData
 {
     int    Id;
-    ImVec2 Origin; // The node origin is in editor space
-    ImRect TitleBarContentRect;
-    ImRect Rect;
+
+private:
+    ImVec2 _Origin; // The node origin is in editor space
+    ImRect _TitleBarContentRect;
+    ImRect _Rect;
+
+public:
+    const ImVec2& Origin() const{// The node origin is in editor space // EDIT actually it makes more sense to put it in grid space
+        static ImVec2 global;
+        global = _Origin;
+        return global;
+    } 
+    const ImRect& TitleBarContentRect() const{
+        static ImRect global;
+        global.Min = _TitleBarContentRect.Min;
+        global.Max = _TitleBarContentRect.Min  + (_TitleBarContentRect.Max - _TitleBarContentRect.Min) * ImNodes::EditorContextGetZoom();
+        return global;
+    }
+    const ImRect& Rect() const {
+        static ImRect global;
+        global.Min = _Rect.Min;
+        global.Max = _Rect.Min  + (_Rect.Max - _Rect.Min) * ImNodes::EditorContextGetZoom();
+        return global;
+    }
+
+    void SetOrigin(ImVec2 o) {_Origin = o;} // The node origin is in GRID space
+    void SetTitleBarContentRect(ImRect r) {_TitleBarContentRect = r;}
+    void SetRect(ImRect r) {_Rect = r;}
 
     struct
     {
@@ -153,8 +178,8 @@ struct ImNodeData
     bool          Draggable;
 
     ImNodeData(const int node_id)
-        : Id(node_id), Origin(100.0f, 100.0f), TitleBarContentRect(),
-          Rect(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
+        : Id(node_id), _Origin(100.0f, 100.0f), _TitleBarContentRect(),
+          _Rect(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
           Draggable(true)
     {
     }
@@ -253,7 +278,8 @@ struct ImNodesEditorContext
     ImVector<int> NodeDepthOrder;
 
     // ui related fields
-    ImVec2 Panning;
+    ImVec2 Panning; // In Editor space (applies after the zoom)
+    float Zoom;
     ImVec2 AutoPanningDelta;
     // Minimum and maximum extents of all content in grid space. Valid after final
     // ImNodes::EndNode() call.
@@ -279,7 +305,7 @@ struct ImNodesEditorContext
     float  MiniMapScaling;
 
     ImNodesEditorContext()
-        : Nodes(), Pins(), Links(), Panning(0.f, 0.f), SelectedNodeIndices(), SelectedLinkIndices(),
+        : Nodes(), Pins(), Links(), Panning(0.f, 0.f), Zoom(1.f), SelectedNodeIndices(), SelectedLinkIndices(),
           ClickInteraction(), MiniMapEnabled(false), MiniMapSizeFraction(0.0f),
           MiniMapNodeHoveringCallback(NULL), MiniMapNodeHoveringCallbackUserData(NULL),
           MiniMapScaling(0.0f)
