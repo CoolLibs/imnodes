@@ -2449,10 +2449,12 @@ void BeginNode(const int node_id)
 
     ImGui::PushID(node.Id);
     ImGui::BeginGroup();
+    ImGui::PushClipRect(node.Rect().Min, node.Rect().Max, true);
 }
 
 void EndNode()
 {
+    ImGui::PopClipRect();
     assert(GImNodes->CurrentScope == ImNodesScope_Node);
     GImNodes->CurrentScope = ImNodesScope_Editor;
 
