@@ -1485,46 +1485,37 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
         {
             ImRect title_bar_rect = GetNodeTitleRect(node);
 
+            GImNodes->CanvasDrawList->AddRectFilled(
+                title_bar_rect.Min,
+                title_bar_rect.Max,
+                titlebar_background,
+                node.LayoutStyle.CornerRounding,
 #if IMGUI_VERSION_NUM < 18200
-            GImNodes->CanvasDrawList->AddRectFilled(
-                title_bar_rect.Min,
-                title_bar_rect.Max,
-                titlebar_background,
-                node.LayoutStyle.CornerRounding,
-                ImDrawCornerFlags_Top);
+                ImDrawCornerFlags_Top
 #else
-            GImNodes->CanvasDrawList->AddRectFilled(
-                title_bar_rect.Min,
-                title_bar_rect.Max,
-                titlebar_background,
-                node.LayoutStyle.CornerRounding,
-                ImDrawFlags_RoundCornersTop);
-
+                ImDrawFlags_RoundCornersTop
 #endif
+            );
         }
 
+        // outline
         if ((GImNodes->Style.Flags & ImNodesStyleFlags_NodeOutline) != 0)
         {
-#if IMGUI_VERSION_NUM < 18200
-            GImNodes->CanvasDrawList->AddRect(
-                node.Rect.Min,
-                node.Rect.Max,
-                node.ColorStyle.Outline,
-                node.LayoutStyle.CornerRounding,
-                ImDrawCornerFlags_All,
-                node.LayoutStyle.BorderThickness);
-#else
             GImNodes->CanvasDrawList->AddRect(
                 node.Rect().Min,
                 node.Rect().Max,
                 node.ColorStyle.Outline,
                 node.LayoutStyle.CornerRounding,
+#if IMGUI_VERSION_NUM < 18200
+                ImDrawCornerFlags_All,
+#else
                 ImDrawFlags_RoundCornersAll,
-                node.LayoutStyle.BorderThickness);
 #endif
+                node.LayoutStyle.BorderThickness);
         }
     }
 
+    // pins
     for (int i = 0; i < node.PinIndices.size(); ++i)
     {
         DrawPin(editor, node.PinIndices[i]);
