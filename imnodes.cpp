@@ -254,14 +254,24 @@ inline bool RectangleOverlapsLink(
 
 // [SECTION] coordinate space conversion helpers
 
+inline ImVec2 Grid_2_EditorScale(const ImVec2& v)
+{
+    return v * EditorContextGetZoom();
+}
+
+inline ImVec2 Editor_2_GridScale(const ImVec2& v)
+{
+    return v / EditorContextGetZoom();
+}
+
 inline ImVec2 Grid_2_Editor(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return v * EditorContextGetZoom() + editor.Panning;
+    return Grid_2_EditorScale(v) + editor.Panning;
 }
 
 inline ImVec2 Editor_2_Grid(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return (v - editor.Panning) / EditorContextGetZoom();
+    return Editor_2_GridScale(v - editor.Panning);
 }
 
 inline ImVec2 Editor_2_Screen(const ImVec2& v)
@@ -793,7 +803,7 @@ void TranslateSelectedNodes(ImNodesEditorContext& editor)
             ImNodeData& node = editor.Nodes.Pool[node_idx];
             if (node.Draggable)
             {
-                node.SetOrigin(node.Origin() + (io.MouseDelta - editor.AutoPanningDelta) / EditorContextGetZoom());
+                node.OriginInGridSpace += Editor_2_GridScale(io.MouseDelta - editor.AutoPanningDelta);
             }
         }
     }
@@ -1253,21 +1263,21 @@ ImOptionalIndex ResolveHoveredLink(
 
 inline ImRect GetItemRect() { return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax()); }
 
-inline ImVec2 GetNodeTitleBarOrigin(const ImNodeData& node)
+inline ImVec2 GetNodeTitleBarOriginInGridSpace(const ImNodeData& node)
 {
-    return node.Origin() + node.LayoutStyle.Padding;
+    return node.OriginInGridSpace + node.LayoutStyle.Padding;
 }
 
-inline ImVec2 GetNodeContentOrigin(const ImNodeData& node)
+inline ImVec2 GetNodeContentOriginInGridSpace(const ImNodeData& node)
 {
     const ImVec2 title_bar_height =
-        ImVec2(0.f, node.TitleBarContentRect().GetHeight() + 2.0f * node.LayoutStyle.Padding.y);
-    return node.Origin() + title_bar_height + node.LayoutStyle.Padding;
+        ImVec2(0.f, node.TitleBarContentRectInGridSpace().GetHeight() + 2.0f * node.LayoutStyle.Padding.y);
+    return node.OriginInGridSpace + title_bar_height + node.LayoutStyle.Padding;
 }
 
 inline ImRect GetNodeTitleRect(const ImNodeData& node)
 {
-    ImRect expanded_title_rect = node.TitleBarContentRect();
+    ImRect expanded_title_rect = node.TitleBarContentRectInGridSpace();
     expanded_title_rect.Expand(node.LayoutStyle.Padding);
 
     return ImRect(
@@ -1445,7 +1455,7 @@ void DrawPin(ImNodesEditorContext& editor, const int pin_idx)
 void DrawNode(ImNodesEditorContext& editor, const int node_idx)
 {
     const ImNodeData& node = editor.Nodes.Pool[node_idx];
-    ImGui::SetCursorPos(Grid_2_Editor(editor, node.Origin()));
+    ImGui::SetCursorPos(Grid_2_Editor(editor, node.OriginInGridSpace));
 
     const bool node_hovered =
         GImNodes->HoveredNodeIdx == node_idx &&
@@ -1471,7 +1481,7 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
             node.Rect().Min, node.Rect().Max, node_background, node.LayoutStyle.CornerRounding);
 
         // title bar:
-        if (node.TitleBarContentRect().GetHeight() > 0.f)
+        if (node.TitleBarContentRectInEditorSpace().GetHeight() > 0.f)
         {
             ImRect title_bar_rect = GetNodeTitleRect(node);
 
@@ -2003,8 +2013,9 @@ void EditorContextMoveToNode(const int node_id)
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
 
-    editor.Panning.x = -node.Origin().x;
-    editor.Panning.y = -node.Origin().y;
+    editor.Panning = Grid_2_EditorScale(node.OriginInGridSpace) * -1.f
+                   + GImNodes->CanvasRectScreenSpace.GetSize() * 0.5f
+                   - node.Rect().GetSize() * 0.5f;
 }
 
 float EditorContextGetZoom()
@@ -2431,7 +2442,7 @@ void BeginNode(const int node_id)
     // ImGui::SetCursorPos sets the cursor position, local to the current widget
     // (in this case, the child object started in BeginNodeEditor). Use
     // ImGui::SetCursorScreenPos to set the screen space coordinates directly.
-    ImGui::SetCursorPos(Grid_2_Editor(editor, GetNodeTitleBarOrigin(node)));
+    ImGui::SetCursorPos(Grid_2_Editor(editor, GetNodeTitleBarOriginInGridSpace(node)));
 
     DrawListAddNode(node_idx);
     DrawListActivateCurrentNodeForeground();
@@ -2456,8 +2467,8 @@ void EndNode()
     rect.Expand(node.LayoutStyle.Padding);
     node.SetRect(rect);
 
-    editor.GridContentBounds.Add(node.Origin());
-    editor.GridContentBounds.Add(node.Origin() + node.Rect().GetSize());
+    editor.GridContentBounds.Add(node.OriginInGridSpace);
+    editor.GridContentBounds.Add(node.OriginInGridSpace + node.Rect().GetSize());
 
     if (node.Rect().Contains(GImNodes->MousePos))
     {
@@ -2491,7 +2502,7 @@ void EndNodeTitleBar()
 
     ImGui::ItemAdd(GetNodeTitleRect(node), ImGui::GetID("title_bar"));
 
-    ImGui::SetCursorPos(Grid_2_Editor(editor, GetNodeContentOrigin(node)));
+    ImGui::SetCursorPos(Grid_2_Editor(editor, GetNodeContentOriginInGridSpace(node)));
 }
 
 void BeginInputAttribute(const int id, const ImNodesPinShape shape)
@@ -2691,21 +2702,21 @@ void SetNodeScreenSpacePos(const int node_id, const ImVec2& screen_space_pos)
 {
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
-    node.SetOrigin(Screen_2_Grid(editor, screen_space_pos));
+    node.OriginInGridSpace = Screen_2_Grid(editor, screen_space_pos);
 }
 
 void SetNodeEditorSpacePos(const int node_id, const ImVec2& editor_space_pos)
 {
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
-    node.SetOrigin(Editor_2_Grid(editor, editor_space_pos));
+    node.OriginInGridSpace = Editor_2_Grid(editor, editor_space_pos);
 }
 
 void SetNodeGridSpacePos(const int node_id, const ImVec2& grid_pos)
 {
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
-    node.SetOrigin( grid_pos);
+    node.OriginInGridSpace = grid_pos;
 }
 
 void SetNodeDraggable(const int node_id, const bool draggable)
@@ -2721,7 +2732,7 @@ ImVec2 GetNodeScreenSpacePos(const int node_id)
     const int             node_idx = ObjectPoolFind(editor.Nodes, node_id);
     assert(node_idx != -1);
     ImNodeData& node = editor.Nodes.Pool[node_idx];
-    return Grid_2_Screen(editor, node.Origin());
+    return Grid_2_Screen(editor, node.OriginInGridSpace);
 }
 
 ImVec2 GetNodeEditorSpacePos(const int node_id)
@@ -2730,7 +2741,7 @@ ImVec2 GetNodeEditorSpacePos(const int node_id)
     const int             node_idx = ObjectPoolFind(editor.Nodes, node_id);
     assert(node_idx != -1);
     ImNodeData& node = editor.Nodes.Pool[node_idx];
-    return Grid_2_Editor(editor, node.Origin());
+    return Grid_2_Editor(editor, node.OriginInGridSpace);
 }
 
 ImVec2 GetNodeGridSpacePos(const int node_id)
@@ -2739,7 +2750,7 @@ ImVec2 GetNodeGridSpacePos(const int node_id)
     const int             node_idx = ObjectPoolFind(editor.Nodes, node_id);
     assert(node_idx != -1);
     ImNodeData& node = editor.Nodes.Pool[node_idx];
-    return node.Origin();
+    return node.OriginInGridSpace;
 }
 
 bool IsEditorHovered() { return MouseInCanvas(); }
@@ -3060,7 +3071,7 @@ void NodeLineHandler(ImNodesEditorContext& editor, const char* const line)
     else if (sscanf(line, "origin=%i,%i", &x, &y) == 2)
     {
         ImNodeData& node = editor.Nodes.Pool[GImNodes->CurrentNodeIdx];
-        node.SetOrigin(ImVec2((float)x, (float)y));
+        node.OriginInGridSpace = ImVec2((float)x, (float)y);
     }
 }
 
@@ -3095,7 +3106,7 @@ const char* SaveEditorStateToIniString(
         {
             const ImNodeData& node = editor.Nodes.Pool[i];
             GImNodes->TextBuffer.appendf("\n[node.%d]\n", node.Id);
-            GImNodes->TextBuffer.appendf("origin=%i,%i\n", (int)node.Origin().x, (int)node.Origin().y);
+            GImNodes->TextBuffer.appendf("origin=%i,%i\n", (int)node.OriginInGridSpace.x, (int)node.OriginInGridSpace.y);
         }
     }
 

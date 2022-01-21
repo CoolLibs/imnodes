@@ -132,23 +132,21 @@ private:
 struct ImNodeData
 {
     int    Id;
+    ImVec2 OriginInGridSpace;
 
 private:
-    ImVec2 _Origin; // The node origin is in editor space
     ImRect _TitleBarContentRect;
     ImRect _Rect;
 
 public:
-    const ImVec2& Origin() const{// The node origin is in editor space // EDIT actually it makes more sense to put it in grid space
-        static ImVec2 global;
-        global = _Origin;
-        return global;
-    } 
-    const ImRect& TitleBarContentRect() const{
+    const ImRect& TitleBarContentRectInEditorSpace() const{
         static ImRect global;
         global.Min = _TitleBarContentRect.Min;
         global.Max = _TitleBarContentRect.Min  + (_TitleBarContentRect.Max - _TitleBarContentRect.Min) * ImNodes::EditorContextGetZoom();
         return global;
+    }
+    const ImRect& TitleBarContentRectInGridSpace() const{
+        return _TitleBarContentRect;
     }
     const ImRect& Rect() const {
         static ImRect global;
@@ -157,7 +155,6 @@ public:
         return global;
     }
 
-    void SetOrigin(ImVec2 o) {_Origin = o;} // The node origin is in GRID space
     void SetTitleBarContentRect(ImRect r) {_TitleBarContentRect = r;}
     void SetRect(ImRect r) {_Rect = r;}
 
@@ -178,7 +175,7 @@ public:
     bool          Draggable;
 
     ImNodeData(const int node_id)
-        : Id(node_id), _Origin(100.0f, 100.0f), _TitleBarContentRect(),
+        : Id(node_id), OriginInGridSpace(100.0f, 100.0f), _TitleBarContentRect(),
           _Rect(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
           Draggable(true)
     {
