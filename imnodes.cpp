@@ -570,7 +570,10 @@ ImVec2 GetScreenSpacePinCoordinates(
     const float x = type == ImNodesAttributeType_Input
                         ? (node_rect.Min.x - GImNodes->Style.PinOffset)
                         : (node_rect.Max.x + GImNodes->Style.PinOffset);
-    return ImVec2(x, 0.5f * (attribute_rect.Min.y + attribute_rect.Max.y));
+    const float y = fmin(
+                        0.5f * (attribute_rect.Min.y + attribute_rect.Max.y) // Desired position in screen space
+                        , node_rect.Max.y);                                  // But we make sure it doesn't go past the bottom of the node; this happens when we zoom out and the node becomes too small to contain all the pins with the desired spacing
+    return ImVec2(x, y);
 }
 
 ImVec2 GetScreenSpacePinCoordinates(const ImNodesEditorContext& editor, const ImPinData& pin)
