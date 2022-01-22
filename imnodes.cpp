@@ -3074,7 +3074,15 @@ void NodeLineHandler(ImNodesEditorContext& editor, const char* const line)
 
 void EditorLineHandler(ImNodesEditorContext& editor, const char* const line)
 {
-    (void)sscanf(line, "panning=%f,%f", &editor.Panning.x, &editor.Panning.y);
+    float panning_x, panning_y;
+    float zoom;
+    if (sscanf(line, "panning=%f,%f", &panning_x, &panning_y) == 2) {
+        editor.Panning.x = panning_x;
+        editor.Panning.y = panning_y;
+    }
+    else if (sscanf(line, "zoom=%f", &zoom) == 1) {
+        editor.Zoom = zoom;
+    }
 }
 } // namespace
 
@@ -3095,7 +3103,7 @@ const char* SaveEditorStateToIniString(
     GImNodes->TextBuffer.reserve(64 * editor.Nodes.Pool.size());
 
     GImNodes->TextBuffer.appendf(
-        "[editor]\npanning=%i,%i\n", (int)editor.Panning.x, (int)editor.Panning.y);
+        "[editor]\npanning=%i,%i\nzoom=%f\n", (int)editor.Panning.x, (int)editor.Panning.y, editor.Zoom);
 
     for (int i = 0; i < editor.Nodes.Pool.size(); i++)
     {
