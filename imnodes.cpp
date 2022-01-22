@@ -2025,7 +2025,7 @@ void EditorContextSetZoom(float zoom, const ImVec2& zoom_centering_pos_in_screen
     // }
     ImNodesEditorContext& editor = EditorContextGet();
     const float old_zoom = editor.Zoom;
-    const float new_zoom = fmax(0.1f, fmin(10.0f, zoom));
+    const float new_zoom = fmax(0.01f, fmin(10.0f, zoom));
     // const ImVec2 old_center = Screen_2_Grid(editor, zoom_centering_pos);
     // editor.Zoom = new_zoom;
     // const ImVec2 new_center = Screen_2_Grid(editor, zoom_centering_pos);
