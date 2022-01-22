@@ -175,7 +175,7 @@ struct ImPinData
 {
     int                  Id;
     int                  ParentNodeIdx;
-    ImRect               AttributeRect;
+    ImRect               AttributeRectScreenSpace;
     ImNodesAttributeType Type;
     ImNodesPinShape      Shape;
     ImVec2               Pos; // screen-space coordinates
@@ -187,7 +187,7 @@ struct ImPinData
     } ColorStyle;
 
     ImPinData(const int pin_id)
-        : Id(pin_id), ParentNodeIdx(), AttributeRect(), Type(ImNodesAttributeType_None),
+        : Id(pin_id), ParentNodeIdx(), AttributeRectScreenSpace(), Type(ImNodesAttributeType_None),
           Shape(ImNodesPinShape_CircleFilled), Pos(), Flags(ImNodesAttributeFlags_None),
           ColorStyle()
     {

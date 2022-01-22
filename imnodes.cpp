@@ -576,7 +576,7 @@ ImVec2 GetScreenSpacePinCoordinates(
 ImVec2 GetScreenSpacePinCoordinates(const ImNodesEditorContext& editor, const ImPinData& pin)
 {
     const ImRect parent_node_rect = editor.Nodes.Pool[pin.ParentNodeIdx].RectInEditorSpace();
-    return GetScreenSpacePinCoordinates(parent_node_rect, pin.AttributeRect, pin.Type);
+    return GetScreenSpacePinCoordinates(parent_node_rect, pin.AttributeRectScreenSpace, pin.Type);
 }
 
 bool MouseInCanvas()
@@ -779,9 +779,9 @@ void BoxSelectorUpdateSelection(ImNodesEditorContext& editor, ImRect box_rect)
             const ImRect    node_end_rect = editor.Nodes.Pool[pin_end.ParentNodeIdx].RectInEditorSpace();
 
             const ImVec2 start = GetScreenSpacePinCoordinates(
-                node_start_rect, pin_start.AttributeRect, pin_start.Type);
+                node_start_rect, pin_start.AttributeRectScreenSpace, pin_start.Type);
             const ImVec2 end =
-                GetScreenSpacePinCoordinates(node_end_rect, pin_end.AttributeRect, pin_end.Type);
+                GetScreenSpacePinCoordinates(node_end_rect, pin_end.AttributeRectScreenSpace, pin_end.Type);
 
             // Test
             if (RectangleOverlapsLink(box_rect, start, end, pin_start.Type))
@@ -1440,7 +1440,7 @@ void DrawPin(ImNodesEditorContext& editor, const int pin_idx)
     ImPinData&    pin = editor.Pins.Pool[pin_idx];
     const ImRect parent_node_rect = editor.Nodes.Pool[pin.ParentNodeIdx].RectInEditorSpace();
 
-    pin.Pos = GetScreenSpacePinCoordinates(parent_node_rect, pin.AttributeRect, pin.Type);
+    pin.Pos = GetScreenSpacePinCoordinates(parent_node_rect, pin.AttributeRectScreenSpace, pin.Type);
 
     ImU32 pin_color = pin.ColorStyle.Background;
 
@@ -1627,7 +1627,7 @@ void EndPinAttribute()
     ImNodesEditorContext& editor = EditorContextGet();
     ImPinData&            pin = editor.Pins.Pool[GImNodes->CurrentPinIdx];
     ImNodeData&           node = editor.Nodes.Pool[GImNodes->CurrentNodeIdx];
-    pin.AttributeRect = GetItemRect();
+    pin.AttributeRectScreenSpace = GetItemRect();
     node.PinIndices.push_back(GImNodes->CurrentPinIdx);
 }
 
