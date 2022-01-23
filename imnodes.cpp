@@ -2462,7 +2462,7 @@ void EndNode()
     ImNodeData& node = editor.Nodes.Pool[GImNodes->CurrentNodeIdx];
     auto rect = GetItemRect();
     rect.Expand(node.LayoutStyle.Padding);
-    node.SetRect(rect);
+    node.RectInGridSpace = rect;
 
     editor.GridContentBounds.Add(node.OriginInGridSpace);
     editor.GridContentBounds.Add(node.OriginInGridSpace + node.RectInEditorSpace().GetSize());

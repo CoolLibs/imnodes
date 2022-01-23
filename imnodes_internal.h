@@ -134,16 +134,12 @@ struct ImNodeData
     int    Id;
     ImVec2 OriginInGridSpace;
     ImRect TitleBarContentRectInGridSpace;
+    ImRect RectInGridSpace;
 
-private:
-    ImRect _Rect;
-
-public:
     const ImRect RectInEditorSpace() const {
-        return {_Rect.Min, _Rect.Min  + (_Rect.Max - _Rect.Min) * ImNodes::EditorContextGetZoom()};
+        return { RectInGridSpace.Min, 
+                 RectInGridSpace.Min + RectInGridSpace.GetSize() * ImNodes::EditorContextGetZoom()}; // We scale the size of the rectangle to emulate a zoom
     }
-
-    void SetRect(ImRect r) {_Rect = r;}
 
     struct
     {
@@ -163,7 +159,7 @@ public:
 
     ImNodeData(const int node_id)
         : Id(node_id), OriginInGridSpace(100.0f, 100.0f), TitleBarContentRectInGridSpace(),
-          _Rect(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
+          RectInGridSpace(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
           Draggable(true)
     {
     }
