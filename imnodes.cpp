@@ -2326,6 +2326,10 @@ void EndNodeEditor()
 
     if (!IsMiniMapHovered())
     {
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows)) {
+            EditorContextChangeZoom(ImGui::GetIO().MouseWheel, ImGui::GetMousePos());
+        }
+
         if (GImNodes->LeftMouseClicked && GImNodes->HoveredLinkIdx.HasValue())
         {
             BeginLinkInteraction(editor, GImNodes->HoveredLinkIdx.Value(), GImNodes->HoveredPinIdx);
