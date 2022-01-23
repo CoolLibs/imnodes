@@ -303,9 +303,9 @@ inline ImVec2 MiniMapSpaceToEditorSpace(const ImNodesEditorContext& editor, cons
 {
     // return (v - editor.MiniMapContentScreenSpace.Min) / editor.MiniMapScaling +
     //        editor.GridContentBounds.Min;
-    return (
+    return Grid_2_EditorScale(
         (v - editor.MiniMapContentScreenSpace.Min) / editor.MiniMapScaling +  editor.GridContentBounds.Min
-    ) * EditorContextGetZoom();
+    );
 };
 
 inline ImVec2 ScreenSpaceToMiniMapSpace(const ImNodesEditorContext& editor, const ImVec2& v)
@@ -2020,28 +2020,17 @@ void EditorContextChangeZoom(float delta, const ImVec2& zoom_center_in_screen_sp
 
 float EditorContextGetZoom()
 {
-    ImNodesEditorContext& editor = EditorContextGet();
-    return editor.Zoom;
+    return EditorContextGet().Zoom;
 }
-void EditorContextSetZoom(float zoom, const ImVec2& zoom_centering_pos_in_screen_space)
+
+void EditorContextSetZoom(float zoom, const ImVec2& zoom_center_in_screen_space)
 {
-    // if (zoom != 0.f){
-    //     std::cout << Screen_2_Editor(zoom_centering_pos).x << " " << Screen_2_Editor(zoom_centering_pos).y << '\n';
-    // }
     ImNodesEditorContext& editor = EditorContextGet();
     const float old_zoom = editor.Zoom;
-    const float new_zoom = fmax(0.01f, fmin(10.0f, zoom));
-    // const ImVec2 old_center = Screen_2_Grid(editor, zoom_centering_pos);
-    // editor.Zoom = new_zoom;
-    // const ImVec2 new_center = Screen_2_Grid(editor, zoom_centering_pos);
-    // editor.Panning += new_center - old_center;
-    const auto old_pos = Screen_2_Grid(editor, zoom_centering_pos_in_screen_space);
-    const auto p = Screen_2_Editor(zoom_centering_pos_in_screen_space);
-    editor.Panning = p - (p - editor.Panning) * new_zoom / old_zoom;
-    // editor.Panning -= (Screen_2_Editor(zoom_centering_pos)) * (1.f - new_zoom / old_zoom) * old_zoom;
+    const float new_zoom = fmax(0.01f, fmin(10.f, zoom));
+    const ImVec2 center = Screen_2_Editor(zoom_center_in_screen_space);
+    editor.Panning = center - (center - editor.Panning) * new_zoom / old_zoom; // Change the Panning such that Screen_2_Grid(editor, zoom_center_in_screen_space) returns the same position as it did before this call to EditorContextSetZoom() (effectively ensuring that the zoom is centered on zoom_center_in_screen_space)
     editor.Zoom = new_zoom;
-    const auto new_pos = Screen_2_Grid(editor, zoom_centering_pos_in_screen_space);
-    std::cout << (new_pos - old_pos).x << " " <<  (new_pos - old_pos).y << '\n';
 }
 
 void SetImGuiContext(ImGuiContext* ctx) { ImGui::SetCurrentContext(ctx); }
