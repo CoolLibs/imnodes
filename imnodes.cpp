@@ -2013,6 +2013,11 @@ void EditorContextMoveToNode(const int node_id)
                    - node.RectInEditorSpace().GetSize() * 0.5f;
 }
 
+void EditorContextChangeZoom(float delta, const ImVec2& zoom_center_in_screen_space) {
+    ImNodes::EditorContextSetZoom(EditorContextGetZoom() * std::pow(GImNodes->Io.ZoomingSpeed, delta),
+                                  zoom_center_in_screen_space);
+}
+
 float EditorContextGetZoom()
 {
     ImNodesEditorContext& editor = EditorContextGet();
