@@ -141,6 +141,12 @@ struct ImNodesIO
     // Panning speed when dragging an element and mouse is outside the main editor view.
     float AutoPanningSpeed;
 
+    // Controls how much the zoom varies when the user scrolls the mouse wheel (or calls EditorContextChangeZoom())
+    // It must be >= 1.f When set to 1.f zooming won't have any effect
+    // More precisely this is the factor by which the scale changes after one scroll of wheel.
+    // For example if it is set to 2.f then everything gets twice as big or twice as small after one single scroll.
+    float ZoomingSpeed;
+
     ImNodesIO();
 };
 
