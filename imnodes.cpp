@@ -2463,7 +2463,7 @@ void EndNode()
     node.RectInGridSpace = rect;
 
     editor.GridContentBounds.Add(node.OriginInGridSpace);
-    editor.GridContentBounds.Add(node.OriginInGridSpace + node.RectInEditorSpace().GetSize());
+    editor.GridContentBounds.Add(node.OriginInGridSpace + node.RectInGridSpace.GetSize());
 
     if (node.RectInEditorSpace().Contains(GImNodes->MousePos))
     {
