@@ -1950,7 +1950,8 @@ ImNodesIO::LinkDetachWithModifierClick::LinkDetachWithModifierClick() : Modifier
 
 ImNodesIO::ImNodesIO()
     : EmulateThreeButtonMouse(), LinkDetachWithModifierClick(),
-      AltMouseButton(ImGuiMouseButton_Middle), AutoPanningSpeed(1000.0f), ZoomingSpeed(1.1f)
+      AltMouseButton(ImGuiMouseButton_Middle), AutoPanningSpeed(1000.0f),
+      ZoomingSpeed(1.1f), ZoomMin(0.01f), ZoomMax(10.f)
 {
 }
 
@@ -2040,7 +2041,7 @@ void EditorContextSetZoom(float zoom, const ImVec2& zoom_center_in_screen_space)
 {
     ImNodesEditorContext& editor = EditorContextGet();
     const float old_zoom = editor.Zoom;
-    const float new_zoom = fmax(0.01f, fmin(10.f, zoom));
+    const float new_zoom = fmax(GImNodes->Io.ZoomMin, fmin(GImNodes->Io.ZoomMax, zoom));
     const ImVec2 center = ScreenToEditor(zoom_center_in_screen_space);
     editor.Panning = center - (center - editor.Panning) * new_zoom / old_zoom; // Change the Panning such that ScreenToGrid(editor, zoom_center_in_screen_space) returns the same position as it did before this call to EditorContextSetZoom() (effectively ensuring that the zoom is centered on zoom_center_in_screen_space)
     editor.Zoom = new_zoom;

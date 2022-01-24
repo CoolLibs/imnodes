@@ -146,6 +146,10 @@ struct ImNodesIO
     // More precisely this is the factor by which the scale changes after one scroll of wheel.
     // For example if it is set to 2.f then everything gets twice as big or twice as small after one single scroll.
     float ZoomingSpeed;
+    // Controls how much EditorContextChangeZoom() and EditorContextSetZoom() are allowed to zoom out
+    float ZoomMin;
+    // Controls how much EditorContextChangeZoom() and EditorContextSetZoom() are allowed to zoom in
+    float ZoomMax;
 
     ImNodesIO();
 };
