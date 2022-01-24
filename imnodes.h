@@ -247,7 +247,7 @@ ImVec2                EditorContextGetPanning();
 void                  EditorContextResetPanning(const ImVec2& pos);
 void                  EditorContextMoveToNode(const int node_id);
 // Zooms in or out (depending on the sign of delta)
-// This function is already called whenever a wheel scroll event occurs, but you can use it to scroll programmatically whenever you want 
+// This function is already called whenever a wheel scroll event occurs, but you can use it to scroll programmatically whenever you want too
 // Alternatively you can use EditorContextGetZoom() and EditorContextSetZoom() to have more control over the way the zoom changes
 void                  EditorContextChangeZoom(float delta, const ImVec2& zoom_center_in_screen_space);
 float                 EditorContextGetZoom();
