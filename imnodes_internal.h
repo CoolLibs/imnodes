@@ -132,9 +132,10 @@ private:
 struct ImNodeData
 {
     int    Id;
-    ImVec2 Origin; // The node origin is in editor space
-    ImRect TitleBarContentRect;
-    ImRect Rect;
+    ImVec2 OriginInGridSpace;
+    ImRect TitleBarContentRectInGridSpace;
+    ImRect RectInGridSpace;
+    ImRect RectInEditorSpace;
 
     struct
     {
@@ -153,9 +154,9 @@ struct ImNodeData
     bool          Draggable;
 
     ImNodeData(const int node_id)
-        : Id(node_id), Origin(100.0f, 100.0f), TitleBarContentRect(),
-          Rect(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
-          Draggable(true)
+        : Id(node_id), OriginInGridSpace(100.0f, 100.0f), TitleBarContentRectInGridSpace(),
+          RectInGridSpace(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(),
+          PinIndices(), Draggable(true)
     {
     }
 
@@ -166,7 +167,7 @@ struct ImPinData
 {
     int                  Id;
     int                  ParentNodeIdx;
-    ImRect               AttributeRect;
+    ImRect               AttributeRectScreenSpace;
     ImNodesAttributeType Type;
     ImNodesPinShape      Shape;
     ImVec2               Pos; // screen-space coordinates
@@ -178,7 +179,7 @@ struct ImPinData
     } ColorStyle;
 
     ImPinData(const int pin_id)
-        : Id(pin_id), ParentNodeIdx(), AttributeRect(), Type(ImNodesAttributeType_None),
+        : Id(pin_id), ParentNodeIdx(), AttributeRectScreenSpace(), Type(ImNodesAttributeType_None),
           Shape(ImNodesPinShape_CircleFilled), Pos(), Flags(ImNodesAttributeFlags_None),
           ColorStyle()
     {
@@ -253,7 +254,8 @@ struct ImNodesEditorContext
     ImVector<int> NodeDepthOrder;
 
     // ui related fields
-    ImVec2 Panning;
+    ImVec2 Panning; // In Editor space (applies after the zoom)
+    float  Zoom;
     ImVec2 AutoPanningDelta;
     // Minimum and maximum extents of all content in grid space. Valid after final
     // ImNodes::EndNode() call.
@@ -279,10 +281,10 @@ struct ImNodesEditorContext
     float  MiniMapScaling;
 
     ImNodesEditorContext()
-        : Nodes(), Pins(), Links(), Panning(0.f, 0.f), SelectedNodeIndices(), SelectedLinkIndices(),
-          ClickInteraction(), MiniMapEnabled(false), MiniMapSizeFraction(0.0f),
-          MiniMapNodeHoveringCallback(NULL), MiniMapNodeHoveringCallbackUserData(NULL),
-          MiniMapScaling(0.0f)
+        : Nodes(), Pins(), Links(), Panning(0.f, 0.f), Zoom(1.f), SelectedNodeIndices(),
+          SelectedLinkIndices(), ClickInteraction(), MiniMapEnabled(false),
+          MiniMapSizeFraction(0.0f), MiniMapNodeHoveringCallback(NULL),
+          MiniMapNodeHoveringCallbackUserData(NULL), MiniMapScaling(0.0f)
     {
     }
 };

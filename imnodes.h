@@ -141,6 +141,18 @@ struct ImNodesIO
     // Panning speed when dragging an element and mouse is outside the main editor view.
     float AutoPanningSpeed;
 
+    // Controls how much the zoom varies when the user scrolls the mouse wheel (or calls
+    // EditorContextChangeZoom()). It must be >= 1.f. When set to 1.f zooming won't have any effect.
+    // More precisely this is the factor by which the scale changes after one scroll of wheel.
+    // For example if it is set to 2.f then everything gets twice as big or twice as small after one
+    // single scroll.
+    float ZoomingSpeed;
+    // Controls how much EditorContextChangeZoom() and EditorContextSetZoom() are allowed to zoom
+    // out
+    float ZoomMin;
+    // Controls how much EditorContextChangeZoom() and EditorContextSetZoom() are allowed to zoom in
+    float ZoomMax;
+
     ImNodesIO();
 };
 
@@ -236,6 +248,13 @@ void                  EditorContextSet(ImNodesEditorContext*);
 ImVec2                EditorContextGetPanning();
 void                  EditorContextResetPanning(const ImVec2& pos);
 void                  EditorContextMoveToNode(const int node_id);
+// Zooms in or out (depending on the sign of delta).
+// This function is already called whenever a wheel scroll event occurs, but you can use it to
+// scroll programmatically whenever you want too. Alternatively you can use EditorContextGetZoom()
+// and EditorContextSetZoom() to have more control over the way the zoom changes.
+void  EditorContextChangeZoom(float delta, const ImVec2& zoom_center_in_screen_space);
+float EditorContextGetZoom();
+void  EditorContextSetZoom(float zoom, const ImVec2& zoom_centering_pos_in_screen_space = ImVec2());
 
 ImNodesIO& GetIO();
 
