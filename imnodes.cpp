@@ -260,6 +260,11 @@ inline bool RectangleOverlapsLink(
 // __Screen space__ Same as editor space, except that it has been translated
 //                  so that the origin is now the corner of the screen instead of the corner of the ImGui window (Origin is always in the *top-left* corner)
 
+inline float GridToEditorScale(float v)
+{
+    return v * EditorContextGetZoom();
+}
+
 inline ImVec2 GridToEditorScale(const ImVec2& v)
 {
     return v * EditorContextGetZoom();
@@ -1298,9 +1303,10 @@ inline ImRect GetNodeTitleRectInEditorSpace(const ImNodeData& node)
 void DrawGrid(ImNodesEditorContext& editor, const ImVec2& canvas_size)
 {
     const ImVec2 offset = editor.Panning;
+    const float grid_spacing = GridToEditorScale(GImNodes->Style.GridSpacing);
 
-    for (float x = fmodf(offset.x, GImNodes->Style.GridSpacing * EditorContextGetZoom()); x < canvas_size.x;
-         x += GImNodes->Style.GridSpacing * EditorContextGetZoom())
+    for (float x = fmodf(offset.x, grid_spacing); x < canvas_size.x;
+         x += grid_spacing)
     {
         GImNodes->CanvasDrawList->AddLine(
             EditorToScreen(ImVec2(x, 0.0f)),
@@ -1308,8 +1314,8 @@ void DrawGrid(ImNodesEditorContext& editor, const ImVec2& canvas_size)
             GImNodes->Style.Colors[ImNodesCol_GridLine]);
     }
 
-    for (float y = fmodf(offset.y, GImNodes->Style.GridSpacing * EditorContextGetZoom()); y < canvas_size.y;
-         y += GImNodes->Style.GridSpacing * EditorContextGetZoom())
+    for (float y = fmodf(offset.y, grid_spacing); y < canvas_size.y;
+         y += grid_spacing)
     {
         GImNodes->CanvasDrawList->AddLine(
             EditorToScreen(ImVec2(0.0f, y)),
