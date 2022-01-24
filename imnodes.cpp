@@ -1491,15 +1491,16 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
     }
 
     {
+        const auto node_rect = node.RectInEditorSpace();
         // node base
         GImNodes->CanvasDrawList->AddRectFilled(
-            node.RectInEditorSpace().Min, node.RectInEditorSpace().Max, node_background, node.LayoutStyle.CornerRounding);
+            node_rect.Min, node_rect.Max, node_background, node.LayoutStyle.CornerRounding);
 
         // title bar:
         if (node.TitleBarContentRectInGridSpace.GetHeight() > 0.f)
         {
             ImRect title_bar_rect = GetNodeTitleRectInEditorSpace(node);
-            title_bar_rect.Max = ImMin(title_bar_rect.Max, node.RectInEditorSpace().Max);
+            title_bar_rect.Max = ImMin(title_bar_rect.Max, node_rect.Max);
 
             GImNodes->CanvasDrawList->AddRectFilled(
                 title_bar_rect.Min,
@@ -1518,8 +1519,8 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
         if ((GImNodes->Style.Flags & ImNodesStyleFlags_NodeOutline) != 0)
         {
             GImNodes->CanvasDrawList->AddRect(
-                node.RectInEditorSpace().Min,
-                node.RectInEditorSpace().Max,
+                node_rect.Min,
+                node_rect.Max,
                 node.ColorStyle.Outline,
                 node.LayoutStyle.CornerRounding,
 #if IMGUI_VERSION_NUM < 18200
@@ -2454,7 +2455,8 @@ void BeginNode(const int node_id)
 
     ImGui::PushID(node.Id);
     ImGui::BeginGroup();
-    ImGui::PushClipRect(node.RectInEditorSpace().Min, node.RectInEditorSpace().Max, true);
+    const auto node_rect = node.RectInEditorSpace();
+    ImGui::PushClipRect(node_rect.Min, node_rect.Max, true);
 }
 
 void EndNode()
