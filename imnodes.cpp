@@ -575,7 +575,7 @@ ImVec2 GetScreenSpacePinCoordinates(
 
 ImVec2 GetScreenSpacePinCoordinates(const ImNodesEditorContext& editor, const ImPinData& pin)
 {
-    const ImRect parent_node_rect = editor.Nodes.Pool[pin.ParentNodeIdx].RectInEditorSpace();
+    const ImRect& parent_node_rect = editor.Nodes.Pool[pin.ParentNodeIdx].RectInEditorSpace;
     return GetScreenSpacePinCoordinates(parent_node_rect, pin.AttributeRectScreenSpace, pin.Type);
 }
 
@@ -753,7 +753,7 @@ void BoxSelectorUpdateSelection(ImNodesEditorContext& editor, ImRect box_rect)
         if (editor.Nodes.InUse[node_idx])
         {
             ImNodeData& node = editor.Nodes.Pool[node_idx];
-            if (box_rect.Overlaps(node.RectInEditorSpace()))
+            if (box_rect.Overlaps(node.RectInEditorSpace))
             {
                 editor.SelectedNodeIndices.push_back(node_idx);
             }
@@ -774,10 +774,10 @@ void BoxSelectorUpdateSelection(ImNodesEditorContext& editor, ImRect box_rect)
 
             const ImPinData& pin_start = editor.Pins.Pool[link.StartPinIdx];
             const ImPinData& pin_end = editor.Pins.Pool[link.EndPinIdx];
-            const ImRect     node_start_rect =
-                editor.Nodes.Pool[pin_start.ParentNodeIdx].RectInEditorSpace();
-            const ImRect node_end_rect =
-                editor.Nodes.Pool[pin_end.ParentNodeIdx].RectInEditorSpace();
+            const ImRect&    node_start_rect =
+                editor.Nodes.Pool[pin_start.ParentNodeIdx].RectInEditorSpace;
+            const ImRect& node_end_rect =
+                editor.Nodes.Pool[pin_end.ParentNodeIdx].RectInEditorSpace;
 
             const ImVec2 start = GetScreenSpacePinCoordinates(
                 node_start_rect, pin_start.AttributeRectScreenSpace, pin_start.Type);
@@ -1103,8 +1103,8 @@ void ResolveOccludedPins(const ImNodesEditorContext& editor, ImVector<int>& occl
         for (int next_depth_idx = depth_idx + 1; next_depth_idx < depth_stack.Size;
              ++next_depth_idx)
         {
-            const ImRect rect_above =
-                editor.Nodes.Pool[depth_stack[next_depth_idx]].RectInEditorSpace();
+            const ImRect& rect_above =
+                editor.Nodes.Pool[depth_stack[next_depth_idx]].RectInEditorSpace;
 
             // Iterate over each pin
             for (int idx = 0; idx < node_below.PinIndices.Size; ++idx)
@@ -1277,7 +1277,7 @@ inline ImRect GetNodeTitleRectInEditorSpace(const ImNodeData& node)
 
     return ImRect(
         expanded_title_rect.Min,
-        expanded_title_rect.Min + ImVec2(node.RectInEditorSpace().GetWidth(), 0.f) +
+        expanded_title_rect.Min + ImVec2(node.RectInEditorSpace.GetWidth(), 0.f) +
             ImVec2(0.f, expanded_title_rect.GetHeight()));
 }
 
@@ -1431,8 +1431,8 @@ void DrawPinShape(const ImVec2& pin_pos, const ImPinData& pin, const ImU32 pin_c
 
 void DrawPin(ImNodesEditorContext& editor, const int pin_idx)
 {
-    ImPinData&   pin = editor.Pins.Pool[pin_idx];
-    const ImRect parent_node_rect = editor.Nodes.Pool[pin.ParentNodeIdx].RectInEditorSpace();
+    ImPinData&    pin = editor.Pins.Pool[pin_idx];
+    const ImRect& parent_node_rect = editor.Nodes.Pool[pin.ParentNodeIdx].RectInEditorSpace;
 
     pin.Pos =
         GetScreenSpacePinCoordinates(parent_node_rect, pin.AttributeRectScreenSpace, pin.Type);
@@ -1471,7 +1471,7 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
     }
 
     {
-        const auto node_rect = node.RectInEditorSpace();
+        const ImRect& node_rect = node.RectInEditorSpace;
         // node base
         GImNodes->CanvasDrawList->AddRectFilled(
             node_rect.Min, node_rect.Max, node_background, node.LayoutStyle.CornerRounding);
@@ -1732,7 +1732,7 @@ static void MiniMapDrawNode(ImNodesEditorContext& editor, const int node_idx)
 {
     const ImNodeData& node = editor.Nodes.Pool[node_idx];
 
-    const ImRect node_rect = ScreenToMiniMap(editor, node.RectInEditorSpace());
+    const ImRect node_rect = ScreenToMiniMap(editor, node.RectInEditorSpace);
 
     // Round to near whole pixel value for corner-rounding to prevent visual glitches
     const float mini_map_node_rounding =
@@ -2007,7 +2007,7 @@ void EditorContextMoveToNode(const int node_id)
 
     editor.Panning = GridToEditorScale(node.OriginInGridSpace) * -1.f +
                      GImNodes->CanvasRectScreenSpace.GetSize() * 0.5f -
-                     node.RectInEditorSpace().GetSize() * 0.5f;
+                     node.RectInEditorSpace.GetSize() * 0.5f;
 }
 
 void EditorContextChangeZoom(float delta, const ImVec2& zoom_center_in_screen_space)
@@ -2444,10 +2444,9 @@ void BeginNode(const int node_id)
 
     ImGui::PushID(node.Id);
     ImGui::BeginGroup();
-    const auto node_rect = node.RectInEditorSpace();
     ImGui::PushClipRect(
-        node_rect.Min,
-        node_rect.Max,
+        node.RectInEditorSpace.Min,
+        node.RectInEditorSpace.Max,
         true); // Clip the ImGui widgets that will be submitted by the user between BeginNode() and
                // EndNode(). Otherwise they would overflow when we zoom in
 }
@@ -2467,11 +2466,14 @@ void EndNode()
     ImNodeData& node = editor.Nodes.Pool[GImNodes->CurrentNodeIdx];
     node.RectInGridSpace = GetItemRect();
     node.RectInGridSpace.Expand(node.LayoutStyle.Padding);
+    node.RectInEditorSpace = {
+        node.RectInGridSpace.Min,
+        node.RectInGridSpace.Min + GridToEditorScale(node.RectInGridSpace.GetSize())};
 
     editor.GridContentBounds.Add(node.OriginInGridSpace);
     editor.GridContentBounds.Add(node.OriginInGridSpace + node.RectInGridSpace.GetSize());
 
-    if (node.RectInEditorSpace().Contains(GImNodes->MousePos))
+    if (node.RectInEditorSpace.Contains(GImNodes->MousePos))
     {
         GImNodes->NodeIndicesOverlappingWithMouse.push_back(GImNodes->CurrentNodeIdx);
     }
@@ -2483,7 +2485,7 @@ ImVec2 GetNodeDimensions(int node_id)
     const int             node_idx = ObjectPoolFind(editor.Nodes, node_id);
     assert(node_idx != -1); // invalid node_id
     const ImNodeData& node = editor.Nodes.Pool[node_idx];
-    return node.RectInEditorSpace().GetSize();
+    return node.RectInEditorSpace.GetSize();
 }
 
 void BeginNodeTitleBar()
