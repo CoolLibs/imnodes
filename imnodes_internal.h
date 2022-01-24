@@ -136,7 +136,7 @@ struct ImNodeData
     ImRect TitleBarContentRectInGridSpace;
     ImRect RectInGridSpace;
 
-    const ImRect RectInEditorSpace() const {
+    ImRect RectInEditorSpace() const {
         return { RectInGridSpace.Min, 
                  RectInGridSpace.Min + RectInGridSpace.GetSize() * ImNodes::EditorContextGetZoom()}; // We scale the size of the rectangle to emulate a zoom
     }
