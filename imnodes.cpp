@@ -2457,7 +2457,8 @@ void BeginNode(const int node_id)
     ImGui::PushID(node.Id);
     ImGui::BeginGroup();
     const auto node_rect = node.RectInEditorSpace();
-    ImGui::PushClipRect(node_rect.Min, node_rect.Max, true);
+    ImGui::PushClipRect(node_rect.Min, node_rect.Max, true); // Clip the ImGui widgets that will be submitted by the user between BeginNode() and EndNode()
+                                                             // Otherwise they would overflow when we zoom in
 }
 
 void EndNode()
