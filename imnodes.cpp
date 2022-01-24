@@ -1500,7 +1500,7 @@ void DrawNode(ImNodesEditorContext& editor, const int node_idx)
         if (node.TitleBarContentRectInGridSpace.GetHeight() > 0.f)
         {
             ImRect title_bar_rect = GetNodeTitleRectInEditorSpace(node);
-            title_bar_rect.Max = ImMin(title_bar_rect.Max, node_rect.Max);
+            title_bar_rect.Max = ImMin(title_bar_rect.Max, node_rect.Max); // Clip the title bar inside the node rect (The node rect can be smaller than the title bar when we zoom out)
 
             GImNodes->CanvasDrawList->AddRectFilled(
                 title_bar_rect.Min,
