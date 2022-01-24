@@ -1270,13 +1270,6 @@ inline ImVec2 GetNodeTitleBarOriginInGridSpace(const ImNodeData& node)
     return node.OriginInGridSpace + node.LayoutStyle.Padding;
 }
 
-inline ImVec2 GetNodeContentOriginInGridSpace(const ImNodeData& node)
-{
-    const ImVec2 title_bar_height = ImVec2(
-        0.f, node.TitleBarContentRectInGridSpace.GetHeight() + 2.0f * node.LayoutStyle.Padding.y);
-    return node.OriginInGridSpace + title_bar_height + node.LayoutStyle.Padding;
-}
-
 inline ImRect GetNodeTitleRectInEditorSpace(const ImNodeData& node)
 {
     ImRect expanded_title_rect = node.TitleBarContentRectInGridSpace;
@@ -2510,7 +2503,7 @@ void EndNodeTitleBar()
 
     ImGui::ItemAdd(GetNodeTitleRectInEditorSpace(node), ImGui::GetID("title_bar"));
 
-    ImGui::SetCursorPos(GridToEditor(editor, GetNodeContentOriginInGridSpace(node)));
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + node.LayoutStyle.Padding.y * 2.f);
 }
 
 void BeginInputAttribute(const int id, const ImNodesPinShape shape)
