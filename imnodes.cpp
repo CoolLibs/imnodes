@@ -252,6 +252,13 @@ inline bool RectangleOverlapsLink(
 }
 
 // [SECTION] coordinate space conversion helpers
+// There are three coordinate spaces
+// __Grid space__ This is the space where the nodes and links live.
+//                It is independent of any transformation applied by the user (zoom or pan).
+// __Editor space__ This is what happens to grid space after zoom and pan have been applied.
+//                  This space corresponds to what you see on screen in the editor window.
+// __Screen space__ Same as editor space, except that it has been translated
+//                  so that the origin is now the corner of the screen instead of the corner of the ImGui window (Origin is always in the *top-left* corner)
 
 inline ImVec2 GridToEditorScale(const ImVec2& v)
 {
