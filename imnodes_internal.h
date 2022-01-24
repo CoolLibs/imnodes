@@ -136,9 +136,14 @@ struct ImNodeData
     ImRect TitleBarContentRectInGridSpace;
     ImRect RectInGridSpace;
 
-    ImRect RectInEditorSpace() const {
-        return { RectInGridSpace.Min, 
-                 RectInGridSpace.Min + RectInGridSpace.GetSize() * ImNodes::EditorContextGetZoom()}; // We scale the size of the rectangle to emulate a zoom
+    ImRect RectInEditorSpace() const
+    {
+        return {
+            RectInGridSpace.Min,
+            RectInGridSpace.Min +
+                RectInGridSpace.GetSize() *
+                    ImNodes::EditorContextGetZoom()}; // We scale the size of the rectangle to
+                                                      // emulate a zoom
     }
 
     struct
@@ -159,8 +164,8 @@ struct ImNodeData
 
     ImNodeData(const int node_id)
         : Id(node_id), OriginInGridSpace(100.0f, 100.0f), TitleBarContentRectInGridSpace(),
-          RectInGridSpace(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(), PinIndices(),
-          Draggable(true)
+          RectInGridSpace(ImVec2(0.0f, 0.0f), ImVec2(0.0f, 0.0f)), ColorStyle(), LayoutStyle(),
+          PinIndices(), Draggable(true)
     {
     }
 
@@ -259,7 +264,7 @@ struct ImNodesEditorContext
 
     // ui related fields
     ImVec2 Panning; // In Editor space (applies after the zoom)
-    float Zoom;
+    float  Zoom;
     ImVec2 AutoPanningDelta;
     // Minimum and maximum extents of all content in grid space. Valid after final
     // ImNodes::EndNode() call.
@@ -285,10 +290,10 @@ struct ImNodesEditorContext
     float  MiniMapScaling;
 
     ImNodesEditorContext()
-        : Nodes(), Pins(), Links(), Panning(0.f, 0.f), Zoom(1.f), SelectedNodeIndices(), SelectedLinkIndices(),
-          ClickInteraction(), MiniMapEnabled(false), MiniMapSizeFraction(0.0f),
-          MiniMapNodeHoveringCallback(NULL), MiniMapNodeHoveringCallbackUserData(NULL),
-          MiniMapScaling(0.0f)
+        : Nodes(), Pins(), Links(), Panning(0.f, 0.f), Zoom(1.f), SelectedNodeIndices(),
+          SelectedLinkIndices(), ClickInteraction(), MiniMapEnabled(false),
+          MiniMapSizeFraction(0.0f), MiniMapNodeHoveringCallback(NULL),
+          MiniMapNodeHoveringCallbackUserData(NULL), MiniMapScaling(0.0f)
     {
     }
 };
