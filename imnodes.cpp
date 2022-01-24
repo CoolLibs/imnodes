@@ -2474,9 +2474,8 @@ void EndNode()
     ImGui::PopID();
 
     ImNodeData& node = editor.Nodes.Pool[GImNodes->CurrentNodeIdx];
-    auto rect = GetItemRect();
-    rect.Expand(node.LayoutStyle.Padding);
-    node.RectInGridSpace = rect;
+    node.RectInGridSpace = GetItemRect();
+    node.RectInGridSpace.Expand(node.LayoutStyle.Padding);
 
     editor.GridContentBounds.Add(node.OriginInGridSpace);
     editor.GridContentBounds.Add(node.OriginInGridSpace + node.RectInGridSpace.GetSize());
