@@ -5,7 +5,6 @@
 // [SECTION] ui state logic
 // [SECTION] render helpers
 // [SECTION] API implementation
-#include <iostream>
 
 #include "imnodes.h"
 #include "imnodes_internal.h"
@@ -2014,7 +2013,7 @@ void EditorContextMoveToNode(const int node_id)
 }
 
 void EditorContextChangeZoom(float delta, const ImVec2& zoom_center_in_screen_space) {
-    ImNodes::EditorContextSetZoom(EditorContextGetZoom() * std::pow(GImNodes->Io.ZoomingSpeed, delta),
+    ImNodes::EditorContextSetZoom(EditorContextGetZoom() * pow(GImNodes->Io.ZoomingSpeed, delta),
                                   zoom_center_in_screen_space);
 }
 
