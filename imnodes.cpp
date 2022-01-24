@@ -254,71 +254,71 @@ inline bool RectangleOverlapsLink(
 
 // [SECTION] coordinate space conversion helpers
 
-inline ImVec2 Grid_2_EditorScale(const ImVec2& v)
+inline ImVec2 GridToEditorScale(const ImVec2& v)
 {
     return v * EditorContextGetZoom();
 }
 
-inline ImVec2 Editor_2_GridScale(const ImVec2& v)
+inline ImVec2 EditorToGridScale(const ImVec2& v)
 {
     return v / EditorContextGetZoom();
 }
 
-inline ImVec2 Grid_2_Editor(const ImNodesEditorContext& editor, const ImVec2& v)
+inline ImVec2 GridToEditor(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return Grid_2_EditorScale(v) + editor.Panning;
+    return GridToEditorScale(v) + editor.Panning;
 }
 
-inline ImVec2 Editor_2_Grid(const ImNodesEditorContext& editor, const ImVec2& v)
+inline ImVec2 EditorToGrid(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return Editor_2_GridScale(v - editor.Panning);
+    return EditorToGridScale(v - editor.Panning);
 }
 
-inline ImVec2 Editor_2_Screen(const ImVec2& v)
+inline ImVec2 EditorToScreen(const ImVec2& v)
 {
     return v + GImNodes->CanvasOriginScreenSpace;
 }
 
-inline ImVec2 Screen_2_Editor(const ImVec2& v)
+inline ImVec2 ScreenToEditor(const ImVec2& v)
 {
     return v - GImNodes->CanvasOriginScreenSpace;
 }
 
-inline ImVec2 Grid_2_Screen(const ImNodesEditorContext& editor, const ImVec2& v)
+inline ImVec2 GridToScreen(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return Editor_2_Screen(Grid_2_Editor(editor, v));
+    return EditorToScreen(GridToEditor(editor, v));
 }
 
-inline ImVec2 Screen_2_Grid(const ImNodesEditorContext& editor, const ImVec2& v)
+inline ImVec2 ScreenToGrid(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return Editor_2_Grid(editor, Screen_2_Editor(v));
+    return EditorToGrid(editor, ScreenToEditor(v));
 }
 
-inline ImRect Screen_2_Grid(const ImNodesEditorContext& editor, const ImRect& r)
+inline ImRect ScreenToGrid(const ImNodesEditorContext& editor, const ImRect& r)
 {
-    return ImRect(Screen_2_Grid(editor, r.Min), Screen_2_Grid(editor, r.Max));
+    return ImRect(ScreenToGrid(editor, r.Min), ScreenToGrid(editor, r.Max));
 }
 
-inline ImVec2 MiniMapSpaceToEditorSpace(const ImNodesEditorContext& editor, const ImVec2& v)
+inline ImVec2 MiniMapToEditor(const ImNodesEditorContext& editor, const ImVec2& v)
 {
     // return (v - editor.MiniMapContentScreenSpace.Min) / editor.MiniMapScaling +
     //        editor.GridContentBounds.Min;
-    return Grid_2_EditorScale(
+    return GridToEditorScale(
         (v - editor.MiniMapContentScreenSpace.Min) / editor.MiniMapScaling +  editor.GridContentBounds.Min
     );
 };
 
-inline ImVec2 ScreenSpaceToMiniMapSpace(const ImNodesEditorContext& editor, const ImVec2& v)
+inline ImVec2 ScreenToMiniMap(const ImNodesEditorContext& editor, const ImVec2& v)
 {
-    return (Screen_2_Grid(editor, v) - editor.GridContentBounds.Min) *
+    return (ScreenToGrid(editor, v) - editor.GridContentBounds.Min) *
                editor.MiniMapScaling +
            editor.MiniMapContentScreenSpace.Min;
 };
 
-inline ImRect ScreenSpaceToMiniMapSpace(const ImNodesEditorContext& editor, const ImRect& r)
+inline ImRect ScreenToMiniMap(const ImNodesEditorContext& editor, const ImRect& r)
 {
     return ImRect(
-        ScreenSpaceToMiniMapSpace(editor, r.Min), ScreenSpaceToMiniMapSpace(editor, r.Max));
+        ScreenToMiniMap(editor, r.Min), ScreenToMiniMap(editor, r.Max));
 };
 
 // [SECTION] draw list helper
@@ -728,7 +728,7 @@ void BeginCanvasInteraction(ImNodesEditorContext& editor)
     {
         editor.ClickInteraction.Type = ImNodesClickInteractionType_BoxSelection;
         editor.ClickInteraction.BoxSelector.Rect.Min =
-            Screen_2_Grid(editor, GImNodes->MousePos);
+            ScreenToGrid(editor, GImNodes->MousePos);
     }
 }
 
@@ -806,7 +806,7 @@ void TranslateSelectedNodes(ImNodesEditorContext& editor)
             ImNodeData& node = editor.Nodes.Pool[node_idx];
             if (node.Draggable)
             {
-                node.OriginInGridSpace += Editor_2_GridScale(io.MouseDelta - editor.AutoPanningDelta);
+                node.OriginInGridSpace += EditorToGridScale(io.MouseDelta - editor.AutoPanningDelta);
             }
         }
     }
@@ -899,11 +899,11 @@ void ClickInteractionUpdate(ImNodesEditorContext& editor)
     case ImNodesClickInteractionType_BoxSelection:
     {
         editor.ClickInteraction.BoxSelector.Rect.Max =
-            Screen_2_Grid(editor, GImNodes->MousePos);
+            ScreenToGrid(editor, GImNodes->MousePos);
 
         ImRect box_rect = editor.ClickInteraction.BoxSelector.Rect;
-        box_rect.Min = Grid_2_Screen(editor, box_rect.Min);
-        box_rect.Max = Grid_2_Screen(editor, box_rect.Max);
+        box_rect.Min = GridToScreen(editor, box_rect.Min);
+        box_rect.Max = GridToScreen(editor, box_rect.Max);
 
         BoxSelectorUpdateSelection(editor, box_rect);
 
@@ -1297,8 +1297,8 @@ void DrawGrid(ImNodesEditorContext& editor, const ImVec2& canvas_size)
          x += GImNodes->Style.GridSpacing * EditorContextGetZoom())
     {
         GImNodes->CanvasDrawList->AddLine(
-            Editor_2_Screen(ImVec2(x, 0.0f)),
-            Editor_2_Screen(ImVec2(x, canvas_size.y)),
+            EditorToScreen(ImVec2(x, 0.0f)),
+            EditorToScreen(ImVec2(x, canvas_size.y)),
             GImNodes->Style.Colors[ImNodesCol_GridLine]);
     }
 
@@ -1306,8 +1306,8 @@ void DrawGrid(ImNodesEditorContext& editor, const ImVec2& canvas_size)
          y += GImNodes->Style.GridSpacing * EditorContextGetZoom())
     {
         GImNodes->CanvasDrawList->AddLine(
-            Editor_2_Screen(ImVec2(0.0f, y)),
-            Editor_2_Screen(ImVec2(canvas_size.x, y)),
+            EditorToScreen(ImVec2(0.0f, y)),
+            EditorToScreen(ImVec2(canvas_size.x, y)),
             GImNodes->Style.Colors[ImNodesCol_GridLine]);
     }
 }
@@ -1458,7 +1458,7 @@ void DrawPin(ImNodesEditorContext& editor, const int pin_idx)
 void DrawNode(ImNodesEditorContext& editor, const int node_idx)
 {
     const ImNodeData& node = editor.Nodes.Pool[node_idx];
-    ImGui::SetCursorPos(Grid_2_Editor(editor, node.OriginInGridSpace));
+    ImGui::SetCursorPos(GridToEditor(editor, node.OriginInGridSpace));
 
     const bool node_hovered =
         GImNodes->HoveredNodeIdx == node_idx &&
@@ -1736,7 +1736,7 @@ static void MiniMapDrawNode(ImNodesEditorContext& editor, const int node_idx)
 {
     const ImNodeData& node = editor.Nodes.Pool[node_idx];
 
-    const ImRect node_rect = ScreenSpaceToMiniMapSpace(editor, node.RectInEditorSpace());
+    const ImRect node_rect = ScreenToMiniMap(editor, node.RectInEditorSpace());
 
     // Round to near whole pixel value for corner-rounding to prevent visual glitches
     const float mini_map_node_rounding =
@@ -1780,8 +1780,8 @@ static void MiniMapDrawLink(ImNodesEditorContext& editor, const int link_idx)
     const ImPinData&  end_pin = editor.Pins.Pool[link.EndPinIdx];
 
     const CubicBezier cubic_bezier = GetCubicBezier(
-        ScreenSpaceToMiniMapSpace(editor, start_pin.Pos),
-        ScreenSpaceToMiniMapSpace(editor, end_pin.Pos),
+        ScreenToMiniMap(editor, start_pin.Pos),
+        ScreenToMiniMap(editor, end_pin.Pos),
         start_pin.Type,
         GImNodes->Style.LinkLineSegmentsPerLength / editor.MiniMapScaling);
 
@@ -1868,7 +1868,7 @@ static void MiniMapUpdate()
     {
         const ImU32  canvas_color = GImNodes->Style.Colors[ImNodesCol_MiniMapCanvas];
         const ImU32  outline_color = GImNodes->Style.Colors[ImNodesCol_MiniMapCanvasOutline];
-        const ImRect rect = ScreenSpaceToMiniMapSpace(editor, GImNodes->CanvasRectScreenSpace);
+        const ImRect rect = ScreenToMiniMap(editor, GImNodes->CanvasRectScreenSpace);
 
         GImNodes->CanvasDrawList->AddRectFilled(rect.Min, rect.Max, canvas_color);
         GImNodes->CanvasDrawList->AddRect(rect.Min, rect.Max, outline_color);
@@ -1886,7 +1886,7 @@ static void MiniMapUpdate()
                            !GImNodes->NodeIdxSubmissionOrder.empty();
     if (center_on_click)
     {
-        ImVec2 target = MiniMapSpaceToEditorSpace(editor, ImGui::GetMousePos());
+        ImVec2 target = MiniMapToEditor(editor, ImGui::GetMousePos());
         ImVec2 center = GImNodes->CanvasRectScreenSpace.GetSize() * 0.5f;
         editor.Panning = center - target;
     }
@@ -2008,7 +2008,7 @@ void EditorContextMoveToNode(const int node_id)
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
 
-    editor.Panning = Grid_2_EditorScale(node.OriginInGridSpace) * -1.f
+    editor.Panning = GridToEditorScale(node.OriginInGridSpace) * -1.f
                    + GImNodes->CanvasRectScreenSpace.GetSize() * 0.5f
                    - node.RectInEditorSpace().GetSize() * 0.5f;
 }
@@ -2028,8 +2028,8 @@ void EditorContextSetZoom(float zoom, const ImVec2& zoom_center_in_screen_space)
     ImNodesEditorContext& editor = EditorContextGet();
     const float old_zoom = editor.Zoom;
     const float new_zoom = fmax(0.01f, fmin(10.f, zoom));
-    const ImVec2 center = Screen_2_Editor(zoom_center_in_screen_space);
-    editor.Panning = center - (center - editor.Panning) * new_zoom / old_zoom; // Change the Panning such that Screen_2_Grid(editor, zoom_center_in_screen_space) returns the same position as it did before this call to EditorContextSetZoom() (effectively ensuring that the zoom is centered on zoom_center_in_screen_space)
+    const ImVec2 center = ScreenToEditor(zoom_center_in_screen_space);
+    editor.Panning = center - (center - editor.Panning) * new_zoom / old_zoom; // Change the Panning such that ScreenToGrid(editor, zoom_center_in_screen_space) returns the same position as it did before this call to EditorContextSetZoom() (effectively ensuring that the zoom is centered on zoom_center_in_screen_space)
     editor.Zoom = new_zoom;
 }
 
@@ -2217,7 +2217,7 @@ void BeginNodeEditor()
         {
             const ImVec2 canvas_size = ImGui::GetWindowSize();
             GImNodes->CanvasRectScreenSpace = ImRect(
-                Editor_2_Screen(ImVec2(0.f, 0.f)), Editor_2_Screen(canvas_size));
+                EditorToScreen(ImVec2(0.f, 0.f)), EditorToScreen(canvas_size));
 
             if (GImNodes->Style.Flags & ImNodesStyleFlags_GridLines)
             {
@@ -2237,7 +2237,7 @@ void EndNodeEditor()
     bool no_grid_content = editor.GridContentBounds.IsInverted();
     if (no_grid_content)
     {
-        editor.GridContentBounds = Screen_2_Grid(editor, GImNodes->CanvasRectScreenSpace);
+        editor.GridContentBounds = ScreenToGrid(editor, GImNodes->CanvasRectScreenSpace);
     }
 
     // Detect ImGui interaction first, because it blocks interaction with the rest of the UI
@@ -2435,7 +2435,7 @@ void BeginNode(const int node_id)
     // ImGui::SetCursorPos sets the cursor position, local to the current widget
     // (in this case, the child object started in BeginNodeEditor). Use
     // ImGui::SetCursorScreenPos to set the screen space coordinates directly.
-    ImGui::SetCursorPos(Grid_2_Editor(editor, GetNodeTitleBarOriginInGridSpace(node)));
+    ImGui::SetCursorPos(GridToEditor(editor, GetNodeTitleBarOriginInGridSpace(node)));
 
     DrawListAddNode(node_idx);
     DrawListActivateCurrentNodeForeground();
@@ -2497,7 +2497,7 @@ void EndNodeTitleBar()
 
     ImGui::ItemAdd(GetNodeTitleRectInEditorSpace(node), ImGui::GetID("title_bar"));
 
-    ImGui::SetCursorPos(Grid_2_Editor(editor, GetNodeContentOriginInGridSpace(node)));
+    ImGui::SetCursorPos(GridToEditor(editor, GetNodeContentOriginInGridSpace(node)));
 }
 
 void BeginInputAttribute(const int id, const ImNodesPinShape shape)
@@ -2697,14 +2697,14 @@ void SetNodeScreenSpacePos(const int node_id, const ImVec2& screen_space_pos)
 {
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
-    node.OriginInGridSpace = Screen_2_Grid(editor, screen_space_pos);
+    node.OriginInGridSpace = ScreenToGrid(editor, screen_space_pos);
 }
 
 void SetNodeEditorSpacePos(const int node_id, const ImVec2& editor_space_pos)
 {
     ImNodesEditorContext& editor = EditorContextGet();
     ImNodeData&           node = ObjectPoolFindOrCreateObject(editor.Nodes, node_id);
-    node.OriginInGridSpace = Editor_2_Grid(editor, editor_space_pos);
+    node.OriginInGridSpace = EditorToGrid(editor, editor_space_pos);
 }
 
 void SetNodeGridSpacePos(const int node_id, const ImVec2& grid_pos)
@@ -2727,7 +2727,7 @@ ImVec2 GetNodeScreenSpacePos(const int node_id)
     const int             node_idx = ObjectPoolFind(editor.Nodes, node_id);
     assert(node_idx != -1);
     ImNodeData& node = editor.Nodes.Pool[node_idx];
-    return Grid_2_Screen(editor, node.OriginInGridSpace);
+    return GridToScreen(editor, node.OriginInGridSpace);
 }
 
 ImVec2 GetNodeEditorSpacePos(const int node_id)
@@ -2736,7 +2736,7 @@ ImVec2 GetNodeEditorSpacePos(const int node_id)
     const int             node_idx = ObjectPoolFind(editor.Nodes, node_id);
     assert(node_idx != -1);
     ImNodeData& node = editor.Nodes.Pool[node_idx];
-    return Grid_2_Editor(editor, node.OriginInGridSpace);
+    return GridToEditor(editor, node.OriginInGridSpace);
 }
 
 ImVec2 GetNodeGridSpacePos(const int node_id)
