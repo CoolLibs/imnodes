@@ -1934,7 +1934,7 @@ ImNodesIO::LinkDetachWithModifierClick::LinkDetachWithModifierClick() : Modifier
 ImNodesIO::ImNodesIO()
     : EmulateThreeButtonMouse(), LinkDetachWithModifierClick(),
       AltMouseButton(ImGuiMouseButton_Middle), AutoPanningSpeed(1000.0f), ZoomingSpeed(1.1f),
-      ZoomMin(0.01f), ZoomMax(10.f)
+      ZoomMin(0.01f), ZoomMax(1.f)
 {
 }
 
