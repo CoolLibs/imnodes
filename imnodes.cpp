@@ -2400,7 +2400,7 @@ void EndNodeEditor()
 
     if (!IsMiniMapHovered())
     {
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
+        if (ImGui::IsWindowHovered())
         {
             EditorContextChangeZoom(ImGui::GetIO().MouseWheel, ImGui::GetMousePos());
         }
